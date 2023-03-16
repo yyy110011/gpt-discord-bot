@@ -42,15 +42,16 @@ async def generate_completion_response(
     try:
         prompt = Prompt(
             header=Message(
-                "{MY_BOT_NAME}", "{BOT_INSTRUCTIONS}"
+                "system", BOT_INSTRUCTIONS
             ),
-            convo=Conversation(messages + [Message(MY_BOT_NAME)]),
+            convo=Conversation(messages),
         )
         rendered = prompt.render()
         # print(messages[-1].)
-        rendered = [
-            {"role": "user", "content": messages[-1].render()}
-        ]
+        # rendered = [
+        #     {"role": "user", "content": messages[-1].render()}
+        # ]
+
         response = openai.ChatCompletion.create(
             model="gpt-3.5-turbo",
             messages=rendered

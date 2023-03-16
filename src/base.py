@@ -9,18 +9,18 @@ class Message:
     user: str
     text: Optional[str] = None
 
-    # def render(self):
-    #     # result = self.user + ":"
-    #     result = {}
-    #     result["role"] = self.user
-    #     if self.text is not None:
-    #         result["content"] = self.text
-    #         # result = self.text
-    #     return result
-
     def render(self):
+        # result = self.user + ":"
+        result = {}
+        result["role"] = self.user
         if self.text is not None:
-            return self.text
+            result["content"] = self.text
+            # result = self.text
+        return result
+
+    # def render(self):
+    #     if self.text is not None:
+    #         return self.text
 
 @dataclass
 class Conversation:
@@ -47,7 +47,7 @@ class Prompt:
     convo: Conversation
 
     def render(self):
-        return [self.header.render()] + [self.convo.render()]
+        return [self.header.render()] + self.convo.render()
     
     # def render(self):
     #     return [

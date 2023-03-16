@@ -41,15 +41,6 @@ tree = discord.app_commands.CommandTree(client)
 async def on_ready():
     logger.info(f"We have logged in as {client.user}. Invite URL: {BOT_INVITE_URL}")
     completion.MY_BOT_NAME = client.user.name
-    completion.MY_BOT_EXAMPLE_CONVOS = []
-    for c in EXAMPLE_CONVOS:
-        messages = []
-        for m in c.messages:
-            if m.user == "Lenard":
-                messages.append(Message(user=client.user.name, text=m.text))
-            else:
-                messages.append(m)
-        completion.MY_BOT_EXAMPLE_CONVOS.append(Conversation(messages=messages))
     await tree.sync()
 
 
@@ -127,10 +118,10 @@ async def chat_command(int: discord.Interaction, message: str):
         async with thread.typing():
             # fetch completion
             
-            messages = [Message(user=user.name, text=message)]
-            print("-----------------chat_command-------------------------------")
-            print(messages)
-            print("------------------------------------------------")
+            messages = [Message(user="user", text=message)]
+            # print("-----------------chat_command-------------------------------")
+            # print(messages)
+            # print("------------------------------------------------")
             response_data = await generate_completion_response(
                 messages=messages, user=user
             )
@@ -181,48 +172,48 @@ async def on_message(message: DiscordMessage):
             await close_thread(thread=thread)
             return
 
-        # moderate the message
-        flagged_str, blocked_str = moderate_message(
-            message=message.content, user=message.author
-        )
-        await send_moderation_blocked_message(
-            guild=message.guild,
-            user=message.author,
-            blocked_str=blocked_str,
-            message=message.content,
-        )
-        if len(blocked_str) > 0:
-            try:
-                await message.delete()
-                await thread.send(
-                    embed=discord.Embed(
-                        description=f"❌ **{message.author}'s message has been deleted by moderation.**",
-                        color=discord.Color.red(),
-                    )
-                )
-                return
-            except Exception as e:
-                await thread.send(
-                    embed=discord.Embed(
-                        description=f"❌ **{message.author}'s message has been blocked by moderation but could not be deleted. Missing Manage Messages permission in this Channel.**",
-                        color=discord.Color.red(),
-                    )
-                )
-                return
-        await send_moderation_flagged_message(
-            guild=message.guild,
-            user=message.author,
-            flagged_str=flagged_str,
-            message=message.content,
-            url=message.jump_url,
-        )
-        if len(flagged_str) > 0:
-            await thread.send(
-                embed=discord.Embed(
-                    description=f"⚠️ **{message.author}'s message has been flagged by moderation.**",
-                    color=discord.Color.yellow(),
-                )
-            )
+        # # moderate the message
+        # flagged_str, blocked_str = moderate_message(
+        #     message=message.content, user=message.author
+        # )
+        # await send_moderation_blocked_message(
+        #     guild=message.guild,
+        #     user=message.author,
+        #     blocked_str=blocked_str,
+        #     message=message.content,
+        # )
+        # if len(blocked_str) > 0:
+        #     try:
+        #         await message.delete()
+        #         await thread.send(
+        #             embed=discord.Embed(
+        #                 description=f"❌ **{message.author}'s message has been deleted by moderation.**",
+        #                 color=discord.Color.red(),
+        #             )
+        #         )
+        #         return
+        #     except Exception as e:
+        #         await thread.send(
+        #             embed=discord.Embed(
+        #                 description=f"❌ **{message.author}'s message has been blocked by moderation but could not be deleted. Missing Manage Messages permission in this Channel.**",
+        #                 color=discord.Color.red(),
+        #             )
+        #         )
+        #         return
+        # await send_moderation_flagged_message(
+        #     guild=message.guild,
+        #     user=message.author,
+        #     flagged_str=flagged_str,
+        #     message=message.content,
+        #     url=message.jump_url,
+        # )
+        # if len(flagged_str) > 0:
+        #     await thread.send(
+        #         embed=discord.Embed(
+        #             description=f"⚠️ **{message.author}'s message has been flagged by moderation.**",
+        #             color=discord.Color.yellow(),
+        #         )
+        #     )
 
         # wait a bit in case user has more messages
         if SECONDS_DELAY_RECEIVING_MSG > 0:
@@ -238,16 +229,12 @@ async def on_message(message: DiscordMessage):
         logger.info(
             f"Thread message to process - {message.author}: {message.content[:50]} - {thread.name} {thread.jump_url}"
         )
-
         channel_messages = [
             discord_message_to_message(message)
             async for message in thread.history(limit=MAX_THREAD_MESSAGES)
         ]
         channel_messages = [x for x in channel_messages if x is not None]
         channel_messages.reverse()
-        print("-------------------on_message-----------------------------")
-        print(channel_messages)
-        print("------------------------------------------------")
         # generate the response
         async with thread.typing():
             response_data = await generate_completion_response(
