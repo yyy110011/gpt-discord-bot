@@ -67,8 +67,8 @@ async def chat_command(int: discord.Interaction, message: str):
             return
 
         # block servers not in allow list
-        if should_block(guild=int.guild):
-            return
+        # if should_block(guild=int.guild):
+        #     return
 
         user = int.user
         logger.info(f"Chat command by {user} {message[:20]}")
@@ -126,7 +126,11 @@ async def chat_command(int: discord.Interaction, message: str):
         )
         async with thread.typing():
             # fetch completion
+            
             messages = [Message(user=user.name, text=message)]
+            print("-----------------chat_command-------------------------------")
+            print(messages)
+            print("------------------------------------------------")
             response_data = await generate_completion_response(
                 messages=messages, user=user
             )
@@ -146,8 +150,8 @@ async def chat_command(int: discord.Interaction, message: str):
 async def on_message(message: DiscordMessage):
     try:
         # block servers not in allow list
-        if should_block(guild=message.guild):
-            return
+        # if should_block(guild=message.guild):
+        #     return
 
         # ignore messages from the bot
         if message.author == client.user:
@@ -241,7 +245,9 @@ async def on_message(message: DiscordMessage):
         ]
         channel_messages = [x for x in channel_messages if x is not None]
         channel_messages.reverse()
-
+        print("-------------------on_message-----------------------------")
+        print(channel_messages)
+        print("------------------------------------------------")
         # generate the response
         async with thread.typing():
             response_data = await generate_completion_response(

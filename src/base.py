@@ -9,12 +9,18 @@ class Message:
     user: str
     text: Optional[str] = None
 
-    def render(self):
-        result = self.user + ":"
-        if self.text is not None:
-            result += " " + self.text
-        return result
+    # def render(self):
+    #     # result = self.user + ":"
+    #     result = {}
+    #     result["role"] = self.user
+    #     if self.text is not None:
+    #         result["content"] = self.text
+    #         # result = self.text
+    #     return result
 
+    def render(self):
+        if self.text is not None:
+            return self.text
 
 @dataclass
 class Conversation:
@@ -25,9 +31,7 @@ class Conversation:
         return self
 
     def render(self):
-        return f"\n{SEPARATOR_TOKEN}".join(
-            [message.render() for message in self.messages]
-        )
+        return [message.render() for message in self.messages]
 
 
 @dataclass(frozen=True)
@@ -40,14 +44,13 @@ class Config:
 @dataclass(frozen=True)
 class Prompt:
     header: Message
-    examples: List[Conversation]
     convo: Conversation
 
     def render(self):
-        return f"\n{SEPARATOR_TOKEN}".join(
-            [self.header.render()]
-            + [Message("System", "Example conversations:").render()]
-            + [conversation.render() for conversation in self.examples]
-            + [Message("System", "Current conversation:").render()]
-            + [self.convo.render()],
-        )
+        return [self.header.render()] + [self.convo.render()]
+    
+    # def render(self):
+    #     return [
+    #         self.header.render(),
+    #         [Message("assistant", "Example conversations:").render()]
+    #     ]

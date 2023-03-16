@@ -42,38 +42,38 @@ async def generate_completion_response(
     try:
         prompt = Prompt(
             header=Message(
-                "System", f"Instructions for {MY_BOT_NAME}: {BOT_INSTRUCTIONS}"
+                "{MY_BOT_NAME}", "{BOT_INSTRUCTIONS}"
             ),
-            examples=MY_BOT_EXAMPLE_CONVOS,
             convo=Conversation(messages + [Message(MY_BOT_NAME)]),
         )
         rendered = prompt.render()
-        response = openai.Completion.create(
-            engine="text-davinci-003",
-            prompt=rendered,
-            temperature=1.0,
-            top_p=0.9,
-            max_tokens=512,
-            stop=["<|endoftext|>"],
+        # print(messages[-1].)
+        rendered = [
+            {"role": "user", "content": messages[-1].render()}
+        ]
+        response = openai.ChatCompletion.create(
+            model="gpt-3.5-turbo",
+            messages=rendered
         )
-        reply = response.choices[0].text.strip()
-        if reply:
-            flagged_str, blocked_str = moderate_message(
-                message=(rendered + reply)[-500:], user=user
-            )
-            if len(blocked_str) > 0:
-                return CompletionData(
-                    status=CompletionResult.MODERATION_BLOCKED,
-                    reply_text=reply,
-                    status_text=f"from_response:{blocked_str}",
-                )
+        # "choices"][0]["delta"]["content"]
+        reply = response["choices"][0]["message"]["content"] #response.choices[0].text.strip()
+        # if reply:
+        #     # flagged_str, blocked_str = moderate_message(
+        #     #     message=(rendered + reply)[-500:], user=user
+        #     # )
+        #     if len(blocked_str) > 0:
+        #         return CompletionData(
+        #             status=CompletionResult.MODERATION_BLOCKED,
+        #             reply_text=reply,
+        #             status_text=f"from_response:{blocked_str}",
+        #         )
 
-            if len(flagged_str) > 0:
-                return CompletionData(
-                    status=CompletionResult.MODERATION_FLAGGED,
-                    reply_text=reply,
-                    status_text=f"from_response:{flagged_str}",
-                )
+        #     if len(flagged_str) > 0:
+        #         return CompletionData(
+        #             status=CompletionResult.MODERATION_FLAGGED,
+        #             reply_text=reply,
+        #             status_text=f"from_response:{flagged_str}",
+        #         )
 
         return CompletionData(
             status=CompletionResult.OK, reply_text=reply, status_text=None
