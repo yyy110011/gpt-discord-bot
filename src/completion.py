@@ -51,7 +51,7 @@ async def generate_completion_response(
         # rendered = [
         #     {"role": "user", "content": messages[-1].render()}
         # ]
-        print(rendered)
+
         response = openai.ChatCompletion.create(
             model="gpt-3.5-turbo",
             messages=rendered
