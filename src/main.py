@@ -84,8 +84,6 @@ async def chat_command(int: discord.Interaction, action: Enum('prompt', PROMPT_N
         #     return
 
         user = int.user
-        logger.info(f"Chat command by {user} {message[:20]}")
-        
 
         response = await int.original_response()
         # create the thread
@@ -95,21 +93,21 @@ async def chat_command(int: discord.Interaction, action: Enum('prompt', PROMPT_N
             reason="gpt-bot",
             auto_archive_duration=60,
         )
-        async with thread.typing():
-            # fetch completion
+        # async with thread.typing():
+        #     # fetch completion
             
             
-            messages = [Message(user="user", text=message)]
-            # print("-----------------chat_command-------------------------------")
-            # print(messages)
-            # print("------------------------------------------------")
-            response_data = await generate_completion_response(
-                messages=messages, user=user, choose_prompt=CHOOSE_PROMPT
-            )
-            # send the result
-            await process_response(
-                user=user, thread=thread, response_data=response_data
-            )
+        #     messages = [Message(user="user", text=message)]
+        #     # print("-----------------chat_command-------------------------------")
+        #     # print(messages)
+        #     # print("------------------------------------------------")
+        #     response_data = await generate_completion_response(
+        #         messages=messages, user=user, choose_prompt=CHOOSE_PROMPT
+        #     )
+        #     # send the result
+        #     await process_response(
+        #         user=user, thread=thread, response_data=response_data
+        #     )
     except Exception as e:
         logger.exception(e)
         await int.response.send_message(
