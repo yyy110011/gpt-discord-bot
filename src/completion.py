@@ -37,12 +37,12 @@ class CompletionData:
 
 
 async def generate_completion_response(
-    messages: List[Message], user: str
+    messages: List[Message], user: str, choose_prompt: str
 ) -> CompletionData:
     try:
         prompt = Prompt(
             header=Message(
-                "system", BOT_INSTRUCTIONS
+                "system", choose_prompt
             ),
             convo=Conversation(messages),
         )
@@ -51,7 +51,7 @@ async def generate_completion_response(
         # rendered = [
         #     {"role": "user", "content": messages[-1].render()}
         # ]
-
+        print(rendered)
         response = openai.ChatCompletion.create(
             model="gpt-3.5-turbo",
             messages=rendered

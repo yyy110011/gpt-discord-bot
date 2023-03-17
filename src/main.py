@@ -1,8 +1,14 @@
+from typing import Literal, Union, NamedTuple
+from enum import Enum
+
+
 import discord
 from discord import Message as DiscordMessage
 import logging
 from src.base import Message, Conversation
 from src.constants import (
+    PROMPT_LIST,
+    PROMPT_NAME_FOR_ENUM,
     BOT_INVITE_URL,
     DISCORD_BOT_TOKEN,
     EXAMPLE_CONVOS,
@@ -31,10 +37,13 @@ logging.basicConfig(
 )
 
 intents = discord.Intents.default()
-intents.message_content = True
+intents.messages = True
 
 client = discord.Client(intents=intents)
+client = discord.Client(intents=intents)
 tree = discord.app_commands.CommandTree(client)
+
+CHOOSE_PROMPT = ''
 
 
 @client.event
@@ -43,6 +52,15 @@ async def on_ready():
     completion.MY_BOT_NAME = client.user.name
     await tree.sync()
 
+# # /chat message:
+# @tree.command(name="testing_method", description="Create a new thread for conversation",)
+# @discord.app_commands.checks.has_permissions(send_messages=True)
+# @discord.app_commands.checks.has_permissions(view_channel=True)
+# @discord.app_commands.checks.bot_has_permissions(send_messages=True)
+# @discord.app_commands.checks.bot_has_permissions(view_channel=True)
+# @discord.app_commands.checks.bot_has_permissions(manage_threads=True)
+# async def test_command(interaction: discord.Interaction):
+#     await interaction.response.send_message(repr(fruit))
 
 # /chat message:
 @tree.command(name="chat", description="Create a new thread for conversation")
@@ -51,7 +69,11 @@ async def on_ready():
 @discord.app_commands.checks.bot_has_permissions(send_messages=True)
 @discord.app_commands.checks.bot_has_permissions(view_channel=True)
 @discord.app_commands.checks.bot_has_permissions(manage_threads=True)
-async def chat_command(int: discord.Interaction, message: str):
+async def chat_command(int: discord.Interaction, action: Enum('prompt', PROMPT_NAME_FOR_ENUM)):
+    message = "chat-room"
+    global CHOOSE_PROMPT
+    CHOOSE_PROMPT= PROMPT_LIST[str(action)[7:]]
+    await int.response.send_message(f'Prompt: {str(action)[7:]}\n')
     try:
         # only support creating thread in text channel
         if not isinstance(int.channel, discord.TextChannel):
@@ -63,54 +85,12 @@ async def chat_command(int: discord.Interaction, message: str):
 
         user = int.user
         logger.info(f"Chat command by {user} {message[:20]}")
-        try:
-            # moderate the message
-            flagged_str, blocked_str = moderate_message(message=message, user=user)
-            await send_moderation_blocked_message(
-                guild=int.guild,
-                user=user,
-                blocked_str=blocked_str,
-                message=message,
-            )
-            if len(blocked_str) > 0:
-                # message was blocked
-                await int.response.send_message(
-                    f"Your prompt has been blocked by moderation.\n{message}",
-                    ephemeral=True,
-                )
-                return
+        
 
-            embed = discord.Embed(
-                description=f"<@{user.id}> wants to chat! 🤖💬",
-                color=discord.Color.green(),
-            )
-            embed.add_field(name=user.name, value=message)
-
-            if len(flagged_str) > 0:
-                # message was flagged
-                embed.color = discord.Color.yellow()
-                embed.title = "⚠️ This prompt was flagged by moderation."
-
-            await int.response.send_message(embed=embed)
-            response = await int.original_response()
-
-            await send_moderation_flagged_message(
-                guild=int.guild,
-                user=user,
-                flagged_str=flagged_str,
-                message=message,
-                url=response.jump_url,
-            )
-        except Exception as e:
-            logger.exception(e)
-            await int.response.send_message(
-                f"Failed to start chat {str(e)}", ephemeral=True
-            )
-            return
-
+        response = await int.original_response()
         # create the thread
         thread = await response.create_thread(
-            name=f"{ACTIVATE_THREAD_PREFX} {user.name[:20]} - {message[:30]}",
+            name=f"{ACTIVATE_THREAD_PREFX} {user.name[:20]} - {message}",
             slowmode_delay=1,
             reason="gpt-bot",
             auto_archive_duration=60,
@@ -118,12 +98,13 @@ async def chat_command(int: discord.Interaction, message: str):
         async with thread.typing():
             # fetch completion
             
+            
             messages = [Message(user="user", text=message)]
             # print("-----------------chat_command-------------------------------")
             # print(messages)
             # print("------------------------------------------------")
             response_data = await generate_completion_response(
-                messages=messages, user=user
+                messages=messages, user=user, choose_prompt=CHOOSE_PROMPT
             )
             # send the result
             await process_response(
@@ -172,49 +153,6 @@ async def on_message(message: DiscordMessage):
             await close_thread(thread=thread)
             return
 
-        # # moderate the message
-        # flagged_str, blocked_str = moderate_message(
-        #     message=message.content, user=message.author
-        # )
-        # await send_moderation_blocked_message(
-        #     guild=message.guild,
-        #     user=message.author,
-        #     blocked_str=blocked_str,
-        #     message=message.content,
-        # )
-        # if len(blocked_str) > 0:
-        #     try:
-        #         await message.delete()
-        #         await thread.send(
-        #             embed=discord.Embed(
-        #                 description=f"❌ **{message.author}'s message has been deleted by moderation.**",
-        #                 color=discord.Color.red(),
-        #             )
-        #         )
-        #         return
-        #     except Exception as e:
-        #         await thread.send(
-        #             embed=discord.Embed(
-        #                 description=f"❌ **{message.author}'s message has been blocked by moderation but could not be deleted. Missing Manage Messages permission in this Channel.**",
-        #                 color=discord.Color.red(),
-        #             )
-        #         )
-        #         return
-        # await send_moderation_flagged_message(
-        #     guild=message.guild,
-        #     user=message.author,
-        #     flagged_str=flagged_str,
-        #     message=message.content,
-        #     url=message.jump_url,
-        # )
-        # if len(flagged_str) > 0:
-        #     await thread.send(
-        #         embed=discord.Embed(
-        #             description=f"⚠️ **{message.author}'s message has been flagged by moderation.**",
-        #             color=discord.Color.yellow(),
-        #         )
-        #     )
-
         # wait a bit in case user has more messages
         if SECONDS_DELAY_RECEIVING_MSG > 0:
             await asyncio.sleep(SECONDS_DELAY_RECEIVING_MSG)
@@ -237,8 +175,9 @@ async def on_message(message: DiscordMessage):
         channel_messages.reverse()
         # generate the response
         async with thread.typing():
+            global CHOOSE_PROMPT
             response_data = await generate_completion_response(
-                messages=channel_messages, user=message.author
+                messages=channel_messages, user=message.author, choose_prompt=CHOOSE_PROMPT
             )
 
         if is_last_message_stale(
