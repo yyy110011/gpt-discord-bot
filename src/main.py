@@ -146,10 +146,10 @@ async def on_message(message: DiscordMessage):
             # ignore this thread
             return
 
-        if thread.message_count > MAX_THREAD_MESSAGES:
-            # too many messages, no longer going to reply
-            await close_thread(thread=thread)
-            return
+        # if thread.message_count > MAX_THREAD_MESSAGES:
+        #     # too many messages, no longer going to reply
+        #     await close_thread(thread=thread)
+        #     return
 
         # wait a bit in case user has more messages
         if SECONDS_DELAY_RECEIVING_MSG > 0:
