@@ -52,6 +52,7 @@ async def on_ready():
 @discord.app_commands.checks.bot_has_permissions(view_channel=True)
 @discord.app_commands.checks.bot_has_permissions(manage_threads=True)
 async def chat_command(int: discord.Interaction, message: str):
+    #Hi, I'm bruce.
     try:
         # only support creating thread in text channel
         if not isinstance(int.channel, discord.TextChannel):
