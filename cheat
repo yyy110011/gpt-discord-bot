@@ -1,0 +1,6 @@
+2023.7.6
+
+deployed by docker
+
+dk run -d --env-file env.list -it gpt-discord-bot
+
