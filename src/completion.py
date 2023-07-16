@@ -53,7 +53,7 @@ async def generate_completion_response(
         # ]
 
         response = openai.ChatCompletion.create(
-            model="gpt-3.5-turbo",
+            model="gpt-4-0613",
             messages=rendered
         )
         # "choices"][0]["delta"]["content"]
