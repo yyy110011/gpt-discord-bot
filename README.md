@@ -1,6 +1,5 @@
 # Please read!
 
-
 **For any problems running this specific bot:** [Discord Project Post](https://discord.com/channels/974519864045756446/1055336272543092757)
 
 **For general OpenAI API problems or questions:** [Discord API Discussions](https://discord.com/channels/974519864045756446/1037561178286739466)
@@ -14,6 +13,7 @@
 Thank you!
 
 ---
+
 # GPT Discord Bot
 
 Example Discord bot written in Python that uses the [completions API](https://beta.openai.com/docs/api-reference/completions) to have conversations with the `text-davinci-003` model, and the [moderations API](https://beta.openai.com/docs/api-reference/moderations) to filter the messages.
@@ -21,7 +21,6 @@ Example Discord bot written in Python that uses the [completions API](https://be
 **THIS IS NOT CHATGPT.**
 
 This bot uses the [OpenAI Python Library](https://github.com/openai/openai-python) and [discord.py](https://discordpy.readthedocs.io/).
-
 
 # Features
 
@@ -38,18 +37,18 @@ This bot uses the [OpenAI Python Library](https://github.com/openai/openai-pytho
 1. Go to https://beta.openai.com/account/api-keys, create a new API key, and fill in `OPENAI_API_KEY`
 1. Create your own Discord application at https://discord.com/developers/applications
 1. Go to the Bot tab and click "Add Bot"
-    - Click "Reset Token" and fill in `DISCORD_BOT_TOKEN`
-    - Disable "Public Bot" unless you want your bot to be visible to everyone
-    - Enable "Message Content Intent" under "Privileged Gateway Intents"
+   - Click "Reset Token" and fill in `DISCORD_BOT_TOKEN`
+   - Disable "Public Bot" unless you want your bot to be visible to everyone
+   - Enable "Message Content Intent" under "Privileged Gateway Intents"
 1. Go to the OAuth2 tab, copy your "Client ID", and fill in `DISCORD_CLIENT_ID`
 1. Copy the ID the server you want to allow your bot to be used in by right clicking the server icon and clicking "Copy ID". Fill in `ALLOWED_SERVER_IDS`. If you want to allow multiple servers, separate the IDs by "," like `server_id_1,server_id_2`
 1. Install dependencies and run the bot
-    ```
-    pip install -r requirements.txt
-    python -m src.main
-    ```
-    You should see an invite URL in the console. Copy and paste it into your browser to add the bot to your server.
-    Note: make sure you are using Python 3.9+ (check with python --version)
+   ```
+   pip install -r requirements.txt
+   python -m main
+   ```
+   You should see an invite URL in the console. Copy and paste it into your browser to add the bot to your server.
+   Note: make sure you are using Python 3.9+ (check with python --version)
 
 # Optional configuration
 
@@ -62,6 +61,7 @@ This bot uses the [OpenAI Python Library](https://github.com/openai/openai-pytho
 > Why isn't my bot responding to commands?
 
 Ensure that the channels your bots have access to allow the bot to have these permissions.
+
 - Send Messages
 - Send Messages in Threads
 - Create Public Threads

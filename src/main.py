@@ -25,7 +25,7 @@ from src.utils import (
     discord_message_to_message,
 )
 from src import completion
-from src.completion import generate_completion_response, process_response
+from src.completion import generate_completion_response, generate_compress_completion_response, process_response
 from src.moderation import (
     moderate_message,
     send_moderation_blocked_message,
@@ -73,8 +73,7 @@ async def chat_command(int: discord.Interaction, action: Enum('prompt', PROMPT_N
     message = "chat-room"
     global CHOOSE_PROMPT
     CHOOSE_PROMPT= PROMPT_LIST[str(action)[7:]]
-    await int.response.send_message(f'Prompt: {str(action)[7:]}\n')
-
+    await int.response.send_message(f'Prompt: {str(action)[7:]}, /compress: compress previous msg\n')
     try:
         # only support creating thread in text channel
         if not isinstance(int.channel, discord.TextChannel):
@@ -114,7 +113,6 @@ async def chat_command(int: discord.Interaction, action: Enum('prompt', PROMPT_N
         await int.response.send_message(
             f"Failed to start chat {str(e)}", ephemeral=True
         )
-
 
 # calls for each message
 @client.event
@@ -166,6 +164,7 @@ async def on_message(message: DiscordMessage):
         logger.info(
             f"Thread message to process - {message.author}: {message.content[:50]} - {thread.name} {thread.jump_url}"
         )
+
         channel_messages = [
             discord_message_to_message(message)
             async for message in thread.history(limit=MAX_THREAD_MESSAGES)
@@ -175,6 +174,11 @@ async def on_message(message: DiscordMessage):
         # generate the response
         async with thread.typing():
             global CHOOSE_PROMPT
+            if thread.message_count > MAX_THREAD_MESSAGES or True:
+                response_data1 = await generate_compress_completion_response(
+                    messages=channel_messages[:-1], user=message.author, choose_prompt=CHOOSE_PROMPT
+                )
+                print(response_data1)
             response_data = await generate_completion_response(
                 messages=channel_messages, user=message.author, choose_prompt=CHOOSE_PROMPT
             )

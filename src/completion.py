@@ -97,6 +97,51 @@ async def generate_completion_response(
             status=CompletionResult.OTHER_ERROR, reply_text=None, status_text=str(e)
         )
 
+async def generate_compress_completion_response(
+    messages: List[Message], user: str, choose_prompt: str
+) -> CompletionData:
+    print("-----> Do compressing")
+    try:
+        messages.append(
+            Message(
+                "user", "Please summarize the conversation above, into a set of user and assistant conversations (less than 5) include code blocks. PLEASE DO NOT INCLUDE ANY GREETING MESSAGES."
+            )
+        )
+        prompt = Prompt(
+            header=Message(
+                "system", choose_prompt
+            ),
+            convo=Conversation(messages),
+        )
+        rendered = prompt.render()
+        
+        response = openai.ChatCompletion.create(
+            model="gpt-3.5-turbo",
+            messages=rendered
+        )
+
+        reply = response["choices"][0]["message"]["content"] #response.choices[0].text.strip()
+        print(reply)
+        return CompletionData(
+            status=CompletionResult.OK, reply_text=reply, status_text=None
+        )
+    except openai.error.InvalidRequestError as e:
+        if "This model's maximum context length" in e.user_message:
+            return CompletionData(
+                status=CompletionResult.TOO_LONG, reply_text=None, status_text=str(e)
+            )
+        else:
+            logger.exception(e)
+            return CompletionData(
+                status=CompletionResult.INVALID_REQUEST,
+                reply_text=None,
+                status_text=str(e),
+            )
+    except Exception as e:
+        logger.exception(e)
+        return CompletionData(
+            status=CompletionResult.OTHER_ERROR, reply_text=None, status_text=str(e)
+        )
 
 async def process_response(
     user: str, thread: discord.Thread, response_data: CompletionData

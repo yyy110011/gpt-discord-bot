@@ -12,7 +12,6 @@ import discord
 
 from src.constants import MAX_CHARS_PER_REPLY_MSG, INACTIVATE_THREAD_PREFIX
 
-
 def discord_message_to_message(message: DiscordMessage) -> Optional[Message]:
     if (
         message.type == discord.MessageType.thread_starter_message
