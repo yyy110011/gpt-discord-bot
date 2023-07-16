@@ -74,6 +74,7 @@ async def chat_command(int: discord.Interaction, action: Enum('prompt', PROMPT_N
     global CHOOSE_PROMPT
     CHOOSE_PROMPT= PROMPT_LIST[str(action)[7:]]
     await int.response.send_message(f'Prompt: {str(action)[7:]}\n')
+
     try:
         # only support creating thread in text channel
         if not isinstance(int.channel, discord.TextChannel):
