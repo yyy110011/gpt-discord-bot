@@ -54,3 +54,12 @@ class Prompt:
     #         self.header.render(),
     #         [Message("assistant", "Example conversations:").render()]
     #     ]
+
+@dataclass(frozen=True)
+class PromptInstruction:
+    name: str
+    instructions: str
+
+@dataclass(frozen=True)
+class PromptInstructions:
+    prompts: List[PromptInstruction]

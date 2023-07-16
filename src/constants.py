@@ -3,7 +3,7 @@ import os
 import dacite
 import yaml
 from typing import Dict, List
-from src.base import Config
+from src.base import Config, PromptInstructions
 
 load_dotenv()
 
@@ -13,6 +13,16 @@ SCRIPT_DIR = os.path.dirname(os.path.realpath(__file__))
 CONFIG: Config = dacite.from_dict(
     Config, yaml.safe_load(open(os.path.join(SCRIPT_DIR, "config.yaml"), "r"))
 )
+
+PROMPT_LIST: PromptInstructions
+PROMPT_LIST: PromptInstructions = dacite.from_dict(
+    PromptInstructions, yaml.safe_load(open(os.path.join(SCRIPT_DIR, "prompts.yaml"), "r"))
+)
+PROMPT_LIST = {x.name: x.instructions for x in PROMPT_LIST.prompts}
+PROMPT_AMOUNT = len(PROMPT_LIST)
+
+PROMPT_NAME_LIST = list(PROMPT_LIST.keys())
+PROMPT_NAME_FOR_ENUM = [(PROMPT_NAME_LIST[x], x) for x in range(PROMPT_AMOUNT)]
 
 BOT_NAME = CONFIG.name
 BOT_INSTRUCTIONS = CONFIG.instructions

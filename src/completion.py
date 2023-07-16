@@ -37,12 +37,12 @@ class CompletionData:
 
 
 async def generate_completion_response(
-    messages: List[Message], user: str
+    messages: List[Message], user: str, choose_prompt: str
 ) -> CompletionData:
     try:
         prompt = Prompt(
             header=Message(
-                "system", BOT_INSTRUCTIONS
+                "system", choose_prompt
             ),
             convo=Conversation(messages),
         )
